@@ -34,11 +34,6 @@ for (const file of responseFiles) {
 
 let discordChannel;
 
-discordClient.on('ready', () => {
-    console.log(`Logged in as ${discordClient.user.tag} at ${new Date()}!`);
-    discordChannel = discordClient.channels.cache.get(config["discord-log-channel"]);
-});
-
 twitchClient.on('message', function (channel, sender, message, self) {
     if (self) { return; } // Ignore messages from the bot
 
@@ -66,21 +61,60 @@ twitchClient.on('message', function (channel, sender, message, self) {
     if (command.args && !args.length) return twitchClient.say(channel, `, You didn't provide any arguments`);
 
     try {
-        command.execute(twitchClient, channel, sender, message, args);
+        command.twitchExecute(twitchClient, channel, sender, message, args);
     } catch (error) {
         console.error(error);
         twitchClient.say(channel, 'There was an error trying to execute that command!');
     }
 });
 
+discordClient.on('message', message => {
+    if (message.author.bot) return;
+
+    const args = message.content.slice(config.prefix.length).split(/ +/);
+    const commandName = args.shift().toLowerCase();
+
+    let responded = false;
+    for (let response in responses) {
+        let regex = new RegExp(response, "gi");
+        if (regex.test(message.content) && !responded) {
+            if (Math.random() <= value.chance / 100) {
+                responses[response].discordExecute(message); responded = true;
+            }
+        }
+    }
+
+
+    if (!message.content.startsWith(config.prefix)) return;
+
+    const command = commands[commandName];
+
+    if (command == null) return;
+    if (command.args && !args.length) return message.reply("No arguments were provided");
+
+    try {
+        command.discordExecute(message, args);
+    } catch (error) {
+        console.error(error);
+        message.reply("An error occurred during execution");
+    }
+});
+
 twitchClient.on('connected', function (addr, port) {
     console.log(`* Connected to ${addr}:${port}`);
     // Used increments for nicer timings, rather than just every 5 minutes from starting
-    cron.schedule('0,5,10,15,20,25,30,35,40,45,50,55 * * * *', () => {
-        for (let channel in config.channels) twitchClient.say(channel, config.announcements[announcementIndex]);
-        announcementIndex++;
-        if (announcementIndex >= config.announcements.length) announcementIndex = 0;
-    })
+    if (config.announcements.length > 0) {
+        cron.schedule('0,5,10,15,20,25,30,35,40,45,50,55 * * * *', () => {
+            for (let channel in config.channels) twitchClient.say(channel, config.announcements[announcementIndex]);
+            announcementIndex++;
+            if (announcementIndex >= config.announcements.length) announcementIndex = 0;
+        });
+    }
+});
+
+discordClient.on('ready', () => {
+    console.log(`Logged in as ${discordClient.user.tag} at ${new Date()}!`);
+    discordChannel = discordClient.channels.cache.get(config["discord-log-channel"]);
 });
 
 twitchClient.connect();

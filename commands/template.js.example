@@ -12,7 +12,10 @@ module.exports = {
     // If the command REQUIRES arguments, then this should be set to true
     args: false,
     // Code to be executed when the command is run
-    execute(client, channel, sender, message, args) {
+    twitchExecute(client, channel, sender, message, args) {
+
+    },
+    discordExecute(message, args) {
 
     },
 };

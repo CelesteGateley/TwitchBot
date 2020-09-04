@@ -6,7 +6,10 @@ module.exports = {
     // Priority of the trigger. If you have 2 responses that have the same trigger, the lower value priority will be used first.
     priority: 0,
     // Code to execute when the response is triggered.
-    execute(client, target, sender, message) {
+    twitchExecute(client, target, sender, message) {
+
+    },
+    discordExecute(message) {
 
     },
 };
