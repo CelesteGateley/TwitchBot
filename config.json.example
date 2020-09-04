@@ -5,5 +5,8 @@
   "token": "",
   "channels": [""],
   "enableChatResponseFeatures": true,
-  "debug": false
+  "debug": false,
+  "announcements": [],
+  "discord-token": "",
+  "discord-log-channel": ""
 }
