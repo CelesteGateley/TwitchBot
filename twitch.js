@@ -14,14 +14,20 @@ const opts = {
         username: config.client,
         password: config.token
     },
-    channels: config.channels
+    channels: [config.channel]
 };
 const twitchClient = new tmi.client(opts);
 
 const commands = {};
 for (let x in modules) {
     const commandFiles = fs.readdirSync('./commands/' + x).filter(file => file.endsWith('.js'));
-    for (const file of commandFiles) { const command = require(`./commands/` + x + `/${file}`); commands[command.name] = command;  }
+    for (const file of commandFiles) {
+        const command = require(`./commands/` + x + `/${file}`);
+        commands[command.name] = command;
+        let alias;
+        for (alias in command.aliases) { commands[command.aliases[alias]] = command; }
+
+    }
 }
 
 const responseFiles = fs.readdirSync('./responses').filter(file => file.endsWith('.js'));
@@ -105,7 +111,7 @@ twitchClient.on('connected', function (addr, port) {
     // Used increments for nicer timings, rather than just every 5 minutes from starting
     if (config.announcements.length > 0) {
         cron.schedule('0,5,10,15,20,25,30,35,40,45,50,55 * * * *', () => {
-            for (let channel in config.channels) twitchClient.say(channel, config.announcements[announcementIndex]);
+            twitchClient.say(config.channel, config.announcements[announcementIndex]);
             announcementIndex++;
             if (announcementIndex >= config.announcements.length) announcementIndex = 0;
         });
