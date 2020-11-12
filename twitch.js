@@ -5,6 +5,9 @@ const cron = require('node-cron')
 const path = require('path');
 global.appRoot = path.resolve(__dirname);
 
+if (!fs.existsSync('quotes.json')) {
+    fs.writeFileSync('quotes.json', "{\"quotes\":[]}");
+}
 
 const config = require('./config.json')
 const modules = require('./modules.json')
