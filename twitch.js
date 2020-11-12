@@ -2,6 +2,9 @@ const tmi = require('tmi.js');
 const discord = require("discord.js")
 const fs = require('fs');
 const cron = require('node-cron')
+const path = require('path');
+global.appRoot = path.resolve(__dirname);
+
 
 const config = require('./config.json')
 const modules = require('./modules.json')
