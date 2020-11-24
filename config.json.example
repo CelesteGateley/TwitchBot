@@ -8,5 +8,6 @@
   "debug": false,
   "announcements": [],
   "discord-token": "",
-  "discord-log-channel": ""
+  "discord-log-channel": "",
+  "announce-interval": 10
 }

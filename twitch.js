@@ -115,8 +115,24 @@ discordClient.on('message', message => {
 twitchClient.on('connected', function (addr, port) {
     console.log(`* Connected to ${addr}:${port}`);
     // Used increments for nicer timings, rather than just every 5 minutes from starting
+    let interval;
+    if (config["announce-interval"] < 1) { interval = 1; }
+    else if (config["announce-interval"] > 60) { interval = 60; }
+    else { interval = Math.round(config["announce-interval"]); }
+    let cronSchedule = "";
+    console.log("Reached");
+    for (let i = 0; i < 60; i = i + interval) {
+        if (i === 0) {
+            cronSchedule += i;
+        } else {
+            cronSchedule += ("," + i);
+        }
+        console.log(cronSchedule);
+    }
+    cronSchedule += " * * * *";
+    console.log(cronSchedule);
     if (config.announcements.length > 0) {
-        cron.schedule('0,5,10,15,20,25,30,35,40,45,50,55 * * * *', () => {
+        cron.schedule(cronSchedule, () => {
             twitchClient.say(config.channel, config.announcements[announcementIndex]);
             announcementIndex++;
             if (announcementIndex >= config.announcements.length) announcementIndex = 0;
