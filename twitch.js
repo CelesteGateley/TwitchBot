@@ -40,8 +40,8 @@ const responseFiles = fs.readdirSync('./responses').filter(file => file.endsWith
 const responses = {}
 for (const file of responseFiles) {
     const response = require(`./responses/${file}`);
-    for (const trigger of response.triggers) { responses[("\\b(\\w*" + trigger + "\\w*)\\b")] = response; }
-    responses.sort(function (a, b) { if (a.priority < b.priority) { return 1; } else if (a.priority === b.priority) { return 0;} else { return -1; }});
+    for (const trigger of response.triggers) { responses[trigger] = response; }
+    //responses.sort(function (a, b) { if (a.priority < b.priority) { return 1; } else if (a.priority === b.priority) { return 0;} else { return -1; }});
 }
 
 let discordChannel;
@@ -56,14 +56,12 @@ twitchClient.on('message', function (channel, sender, message, self) {
 
     let responded = false;
     for (let response in responses) {
-        let regex = new RegExp(response, "gi");
-        if (regex.test(message.content) && !responded) {
-            if (Math.random() <= value.chance / 100) {
-                responses[response].execute(twitchClient, channel, sender, message); responded = true;
+        if (message.includes(response) && !responded) {
+            if (Math.random() <= responses[response].chance / 100) {
+                responses[response].twitchExecute(twitchClient, channel, sender, message); responded = true;
             }
         }
     }
-
 
     if (!message.startsWith(config.prefix)) return;
 
@@ -90,7 +88,7 @@ discordClient.on('message', message => {
     for (let response in responses) {
         let regex = new RegExp(response, "gi");
         if (regex.test(message.content) && !responded) {
-            if (Math.random() <= value.chance / 100) {
+            if (Math.random() <= response.chance / 100) {
                 responses[response].discordExecute(message); responded = true;
             }
         }
@@ -120,17 +118,16 @@ twitchClient.on('connected', function (addr, port) {
     else if (config["announce-interval"] > 60) { interval = 60; }
     else { interval = Math.round(config["announce-interval"]); }
     let cronSchedule = "";
-    console.log("Reached");
     for (let i = 0; i < 60; i = i + interval) {
         if (i === 0) {
             cronSchedule += i;
         } else {
             cronSchedule += ("," + i);
         }
-        console.log(cronSchedule);
+        //console.log(cronSchedule);
     }
     cronSchedule += " * * * *";
-    console.log(cronSchedule);
+    //console.log(cronSchedule);
     if (config.announcements.length > 0) {
         cron.schedule(cronSchedule, () => {
             twitchClient.say(config.channel, config.announcements[announcementIndex]);
