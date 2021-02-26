@@ -7,7 +7,12 @@ module.exports = {
     priority: 0,
     // Code to execute when the response is triggered.
     twitchExecute(client, target, sender, message) {
+        if (sender.username === "monoryuu") {
+            client.say(target, "Hewwo thewe @" + sender.username);
+        } else {
+
         client.say(target, "Hello there @" + sender.username);
+        }
     },
     discordExecute(message) {
 
